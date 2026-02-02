@@ -200,11 +200,21 @@ function findAllPatterns() {
         // Volumen arriba:
         if (
             !edgePresent(combo, EDGE_1_5) && 
-            !edgePresent(combo, EDGE_2_5) && 
+            !edgePresent(combo, EDGE_2_4) &&
             !edgePresent(combo, EDGE_3_5) && 
             !edgePresent(combo, EDGE_2_5) && 
             !edgePresent(combo, EDGE_2_6) && 
             !edgePresent(combo, EDGE_3_6)
+        ) continue;
+        // Volumen derecha (evita el ciclo 1-5-8-7-4-1):
+        if (
+            !edgePresent(combo, EDGE_2_3) &&
+            !edgePresent(combo, EDGE_5_6) &&
+            !edgePresent(combo, EDGE_8_9) &&
+            !edgePresent(combo, EDGE_2_6) &&
+            !edgePresent(combo, EDGE_3_5) &&
+            !edgePresent(combo, EDGE_5_9) &&
+            !edgePresent(combo, EDGE_6_8)
         ) continue;
         // Verificar restricciones de cruce
         if (violatesCrossing(combo)) continue;
