@@ -121,6 +121,48 @@ function isSimpleCycle(combo) {
     return true;
 }
 
+// Ordena pares para formar un camino/ciclo coherente
+function ordenarPares(arr) {
+    const n = arr.length;
+    const usados = new Array(n).fill(false);
+
+    // Mapa: número -> índices de pares donde aparece
+    const mapa = new Map();
+
+    arr.forEach(([a, b], i) => {
+        if (!mapa.has(a)) mapa.set(a, []);
+        if (!mapa.has(b)) mapa.set(b, []);
+        mapa.get(a).push(i);
+        mapa.get(b).push(i);
+    });
+
+    const resultado = [];
+    let parActual = arr[0].slice(); // copiamos el primero
+    usados[0] = true;
+    resultado.push(parActual);
+
+    while (resultado.length < n) {
+        const segundoComponente = parActual[1];
+        const candidatos = mapa.get(segundoComponente);
+
+        let siguienteIdx = candidatos.find(i => !usados[i]);
+        if (siguienteIdx === undefined) break;
+
+        let [x, y] = arr[siguienteIdx];
+        usados[siguienteIdx] = true;
+
+        // Asegurar que encaje
+        if (x !== segundoComponente) {
+            [x, y] = [y, x];
+        }
+
+        parActual = [x, y];
+        resultado.push(parActual);
+    }
+
+    return resultado;
+}
+
 // Convierte combinación a lista de aristas
 function comboToEdges(combo) {
     const selected = [];
@@ -129,7 +171,7 @@ function comboToEdges(combo) {
             selected.push(edges[i]);
         }
     }
-    return selected;
+    return ordenarPares(selected);
 }
 
 function comboToString(combo) {
@@ -248,8 +290,8 @@ function findAllPatterns() {
     for (let combo = 0; combo < totalCombos; combo++) {
         // Condición: al menos una de (7-8) o (8-9) presente
         if (!edgePresent(combo, EDGE_7_8) && !edgePresent(combo, EDGE_8_9)) continue;
-        // Volumen arriba (al menos uno de estas aristas):
-        if (!edgePresent(combo, EDGE_1_5) && !edgePresent(combo, EDGE_2_5) && !edgePresent(combo, EDGE_3_5) && !edgePresent(combo, EDGE_2_5) && !edgePresent(combo, EDGE_2_6) && !edgePresent(combo, EDGE_3_6)) continue;
+        // Volumen arriba:
+        // if (!edgePresent(combo, EDGE_1_5) || !edgePresent(combo, EDGE_2_5) || !edgePresent(combo, EDGE_3_5) || !edgePresent(combo, EDGE_2_5) || !edgePresent(combo, EDGE_2_6) || !edgePresent(combo, EDGE_3_6)) continue;
         // Verificar restricciones de cruce
         if (violatesCrossing(combo)) continue;
         // Verificar que sea un ciclo simple
