@@ -289,9 +289,23 @@ function findAllPatterns() {
     const results = [];
     for (let combo = 0; combo < totalCombos; combo++) {
         // Condición: al menos una de (7-8) o (8-9) presente
-        if (!edgePresent(combo, EDGE_7_8) && !edgePresent(combo, EDGE_8_9)) continue;
+        if (
+            // Deben estar al menos una de las aristas inferiores (base)
+            !(edgePresent(combo, EDGE_7_8) || edgePresent(combo, EDGE_8_9))
+            // aristas para que la figura se mantenga de pie:
+            && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_5_9))
+            && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_6_8))
+            && !(edgePresent(combo, EDGE_4_8) && edgePresent(combo, EDGE_5_9))
+        ) continue;
         // Volumen arriba:
-        // if (!edgePresent(combo, EDGE_1_5) || !edgePresent(combo, EDGE_2_5) || !edgePresent(combo, EDGE_3_5) || !edgePresent(combo, EDGE_2_5) || !edgePresent(combo, EDGE_2_6) || !edgePresent(combo, EDGE_3_6)) continue;
+        if (
+            !edgePresent(combo, EDGE_1_5) && 
+            !edgePresent(combo, EDGE_2_5) && 
+            !edgePresent(combo, EDGE_3_5) && 
+            !edgePresent(combo, EDGE_2_5) && 
+            !edgePresent(combo, EDGE_2_6) && 
+            !edgePresent(combo, EDGE_3_6)
+        ) continue;
         // Verificar restricciones de cruce
         if (violatesCrossing(combo)) continue;
         // Verificar que sea un ciclo simple
