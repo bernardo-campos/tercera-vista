@@ -178,107 +178,6 @@ function comboToString(combo) {
     return comboToEdges(combo).map(pair => `${pair[0]}-${pair[1]}`).join(', ');
 }
 
-// Dibuja la cuadrícula con las aristas seleccionadas
-function drawPattern(combo) {
-    // Matriz 5x5 para representar posiciones
-    // Coordenadas (fila, columna):
-    // 1: (0,0), 2: (0,2), 3: (0,4)
-    // 4: (2,0), 5: (2,2), 6: (2,4)
-    // 7: (4,0), 8: (4,2), 9: (4,4)
-    const grid = [
-        ['1', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ']
-    ];
-    // Poner números en sus posiciones
-    grid[0][0] = '1'; grid[0][2] = '2'; grid[0][4] = '3';
-    grid[2][0] = '4'; grid[2][2] = '5'; grid[2][4] = '6';
-    grid[4][0] = '7'; grid[4][2] = '8'; grid[4][4] = '9';
-
-    // Función para trazar línea entre dos puntos
-    function drawLine(r1, c1, r2, c2) {
-        if (r1 === r2) {
-            // horizontal
-            const colStart = Math.min(c1, c2);
-            const colEnd = Math.max(c1, c2);
-            for (let c = colStart + 1; c < colEnd; c++) {
-                grid[r1][c] = '─';
-            }
-        } else if (c1 === c2) {
-            // vertical
-            const rowStart = Math.min(r1, r2);
-            const rowEnd = Math.max(r1, r2);
-            for (let r = rowStart + 1; r < rowEnd; r++) {
-                grid[r][c1] = '│';
-            }
-        } else {
-            // diagonal
-            const dr = r2 - r1;
-            const dc = c2 - c1;
-            if (dr === 2 && dc === 2) {
-                // diagonal sureste
-                grid[r1 + 1][c1 + 1] = '\\';
-            } else if (dr === 2 && dc === -2) {
-                // diagonal suroeste
-                grid[r1 + 1][c1 - 1] = '/';
-            } else if (dr === -2 && dc === 2) {
-                // diagonal noreste
-                grid[r1 - 1][c1 + 1] = '/';
-            } else if (dr === -2 && dc === -2) {
-                // diagonal noroeste
-                grid[r1 - 1][c1 - 1] = '\\';
-            } else if (dr === 4 && dc === 2) {
-                // diagonal larga (1-8)
-                grid[r1 + 1][c1 + 1] = '\\';
-                grid[r1 + 2][c1 + 2] = '\\';
-                grid[r1 + 3][c1 + 3] = '\\';
-            } else if (dr === 4 && dc === -2) {
-                // diagonal larga (2-7)
-                grid[r1 + 1][c1 - 1] = '/';
-                grid[r1 + 2][c1 - 2] = '/';
-                grid[r1 + 3][c1 - 3] = '/';
-            } else {
-                // otras diagonales (como 1-5, 2-6, etc.)
-                const midR = (r1 + r2) / 2;
-                const midC = (c1 + c2) / 2;
-                if (dr > 0 && dc > 0) grid[midR][midC] = '\\';
-                else if (dr > 0 && dc < 0) grid[midR][midC] = '/';
-                else if (dr < 0 && dc > 0) grid[midR][midC] = '/';
-                else grid[midR][midC] = '\\';
-            }
-        }
-    }
-
-    // Mapeo de aristas a coordenadas
-    const coord = {
-        1: [0,0], 2: [0,2], 3: [0,4],
-        4: [2,0], 5: [2,2], 6: [2,4],
-        7: [4,0], 8: [4,2], 9: [4,4]
-    };
-
-    // Dibujar cada arista presente
-    for (let i = 0; i < edges.length; i++) {
-        if (edgePresent(combo, i)) {
-            const [a, b] = edges[i];
-            const [r1, c1] = coord[a];
-            const [r2, c2] = coord[b];
-            drawLine(r1, c1, r2, c2);
-        }
-    }
-
-    // Construir string
-    let result = '';
-    for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
-            result += grid[r][c];
-        }
-        result += '\n';
-    }
-    return result;
-}
-
 // Búsqueda principal
 function findAllPatterns() {
     const totalEdges = edges.length;
@@ -328,16 +227,6 @@ function main() {
     const output = patterns.map(combo => comboToEdges(combo));
     fs.writeFileSync('patrones.json', JSON.stringify(output, null, 2));
     console.log('\nPatrones guardados en "patrones.json"');
-
-    // Mostrar visualización de los primeros 3 patrones
-    const showCount = Math.min(3, patterns.length);
-    if (showCount > 0) {
-        console.log('\nVisualización de los primeros', showCount, 'patrones:');
-        for (let i = 0; i < showCount; i++) {
-            console.log(`\nPatrón ${i + 1}:`);
-            console.log(drawPattern(patterns[i]));
-        }
-    }
 }
 
 if (require.main === module) {
@@ -349,6 +238,5 @@ module.exports = {
     violatesCrossing,
     isSimpleCycle,
     comboToString,
-    drawPattern,
     findAllPatterns
 };
