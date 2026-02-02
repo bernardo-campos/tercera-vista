@@ -172,3 +172,91 @@ body {
     .game-column { flex: unset; min-height: 80vh; }
     .list-column { min-height: 50vh; }
 }
+
+.list-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+.btn-solutions {
+    background: #00dbde;
+    color: #1a1a2e;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.btn-solutions:hover {
+    background: #00b3b6;
+}
+
+/* Modal */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.8); 
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #1a1a2e;
+    margin: 5% auto; 
+    padding: 20px;
+    border: 1px solid #00dbde;
+    width: 80%; 
+    max-width: 1000px;
+    height: 80vh;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 219, 222, 0.2);
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    align-self: flex-end;
+    cursor: pointer;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.solutions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-right: 10px;
+}
+
+.solution-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.solution-canvas {
+    background: rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+

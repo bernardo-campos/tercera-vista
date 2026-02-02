@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return {
                     id: index,
                     pathString: pathDisplay.join('-'), // For display only
-                    edgeSet: edgeSet
+                    edgeSet: edgeSet,
+                    segments: segments
                 };
             }).filter(p => p !== null);
 
@@ -319,5 +320,99 @@ document.addEventListener('DOMContentLoaded', async function() {
             renderList();
             showFeedback("Progreso borrado", '#ff416c');
         }
+    }
+
+    // --- Solutions Modal Logic ---
+    const solutionsModal = document.getElementById('solutionsModal');
+    const showSolutionsBtn = document.getElementById('showSolutionsBtn');
+    const closeModalBtn = document.getElementById('closeModal');
+    const solutionsGrid = document.getElementById('solutionsGrid');
+
+    if (showSolutionsBtn) {
+        showSolutionsBtn.addEventListener('click', openSolutionsModal);
+    }
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeSolutionsModal);
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === solutionsModal) closeSolutionsModal();
+    });
+
+    function openSolutionsModal() {
+        solutionsModal.style.display = 'block';
+        renderAllSolutions();
+    }
+
+    function closeSolutionsModal() {
+        solutionsModal.style.display = 'none';
+    }
+
+    function renderAllSolutions() {
+        solutionsGrid.innerHTML = '';
+        
+        validFigures.forEach(figure => {
+            const card = document.createElement('div');
+            card.className = 'solution-card';
+            
+            const isUnlocked = unlockedIndices.has(figure.id);
+            
+            const title = document.createElement('div');
+            title.textContent = `Figura #${figure.id + 1}`;
+            title.style.marginBottom = '5px';
+            title.style.color = isUnlocked ? '#00dbde' : '#fff';
+            
+            const canvas = document.createElement('canvas');
+            canvas.className = 'solution-canvas';
+            canvas.width = 120;
+            canvas.height = 120;
+            
+            card.appendChild(title);
+            card.appendChild(canvas);
+            solutionsGrid.appendChild(card);
+            
+            drawMiniFigure(canvas, figure.segments);
+        });
+    }
+
+    function drawMiniFigure(canvas, segments) {
+        const ctx = canvas.getContext('2d');
+        const padding = 20;
+        const size = canvas.width;
+        const cellSize = (size - 2 * padding) / 2;
+
+        const getCoords = (id) => {
+            const row = Math.floor((id - 1) / 3);
+            const col = (id - 1) % 3;
+            return {
+                x: padding + col * cellSize,
+                y: padding + row * cellSize
+            }; // 1-based index to 0-based row/col
+        };
+
+        // Draw points
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        for(let i=1; i<=9; i++) {
+            const {x, y} = getCoords(i);
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        if (!segments || segments.length === 0) return;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#00dbde';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        segments.forEach(seg => {
+            const start = getCoords(seg[0]);
+            const end = getCoords(seg[1]);
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+        });
+
     }
 });
