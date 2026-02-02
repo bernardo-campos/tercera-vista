@@ -2,7 +2,7 @@
 
 Este script encuentra todos los patrones (ciclos cerrados) en una cuadrícula de 3x3 puntos (numerados del 1 al 9) *(observar la imagen de referencia)* que cumplen las siguientes condiciones:
 
-![Grafo de la imagen](base.png)
+![Grafo de la imagen](img/base.png)
 
 ## Reglas
 
@@ -47,12 +47,12 @@ node gridPatterns.js
 ### Resultados
 El script generará:
 1. Lista de patrones encontrados en la consola
-2. Archivo `patrones.json` con todos los patrones en formato JSON
+2. Archivo `js/patrones.json` con todos los patrones en formato JSON
 3. Visualización ASCII de los primeros 3 patrones
 
 ### Archivos
 - `gridPatterns.js`: Script principal
-- `patrones.json`: Resultados generados (se crea al ejecutar)
+- `js/patrones.json`: Resultados generados (se crea al ejecutar)
 
 ## Ejemplo de salida
 ```

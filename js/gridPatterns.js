@@ -60,10 +60,10 @@ function violatesCrossing(combo) {
     if (edgePresent(combo, EDGE_1_8) && (edgePresent(combo, EDGE_2_7) || edgePresent(combo, EDGE_2_4) || edgePresent(combo, EDGE_4_5) || edgePresent(combo, EDGE_5_7))) return true;
     // Si está presente 2-7, no debe estar presentes 1-5, 1-8, 4-5, 4-8
     if (edgePresent(combo, EDGE_2_7) && (edgePresent(combo, EDGE_1_5) || edgePresent(combo, EDGE_1_8) || edgePresent(combo, EDGE_4_5) || edgePresent(combo, EDGE_4_8))) return true;
-    // Si está presente 4-8, no debe estar presentes 2-7, 5-7 (cruce), 4-7, 4-8, 1-8 (invalida la vista)
-    if (edgePresent(combo, EDGE_4_8) && (edgePresent(combo, EDGE_2_7) || edgePresent(combo, EDGE_5_7) || edgePresent(combo, EDGE_4_7) || edgePresent(combo, EDGE_4_8) || edgePresent(combo, EDGE_1_8))) return true;
+    // Si está presente 4-8, no debe estar presentes 2-7, 5-7
+    if (edgePresent(combo, EDGE_4_8) && (edgePresent(combo, EDGE_2_7) || edgePresent(combo, EDGE_5_7) )) return true;
     // Si está presente 5-7, no debe estar presentes 1-8, 4-8
-    if (edgePresent(combo, EDGE_4_8) && (edgePresent(combo, EDGE_1_8) || edgePresent(combo, EDGE_4_8))) return true;
+    if (edgePresent(combo, EDGE_5_7) && (edgePresent(combo, EDGE_1_8) || edgePresent(combo, EDGE_4_8))) return true;
     // Además, no deben estar presentes al mismo tiempo:
     if (edgePresent(combo, EDGE_1_2) && edgePresent(combo, EDGE_2_3)) return true;
     if (edgePresent(combo, EDGE_3_6) && edgePresent(combo, EDGE_6_9)) return true;
@@ -171,11 +171,12 @@ function comboToEdges(combo) {
             selected.push(edges[i]);
         }
     }
-    return ordenarPares(selected);
+    return selected;
 }
 
 function comboToString(combo) {
-    return comboToEdges(combo).map(pair => `${pair[0]}-${pair[1]}`).join(', ');
+    let edges = comboToEdges(combo);
+    return ordenarPares(edges).map(pair => `${pair[0]}-${pair[1]}`).join(', ');
 }
 
 // Búsqueda principal
@@ -192,9 +193,9 @@ function findAllPatterns() {
             // Deben estar al menos una de las aristas inferiores (base)
             !(edgePresent(combo, EDGE_7_8) || edgePresent(combo, EDGE_8_9))
             // aristas para que la figura se mantenga de pie:
-            && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_5_9))
-            && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_6_8))
-            && !(edgePresent(combo, EDGE_4_8) && edgePresent(combo, EDGE_5_9))
+            // && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_5_9))
+            // && !(edgePresent(combo, EDGE_5_7) && edgePresent(combo, EDGE_6_8))
+            // && !(edgePresent(combo, EDGE_4_8) && edgePresent(combo, EDGE_5_9))
         ) continue;
         // Volumen arriba:
         if (
@@ -220,7 +221,7 @@ function main() {
     console.log(`\nPatrones encontrados: ${patterns.length}`);
     console.log('\nLista de patrones (aristas):');
     patterns.forEach((combo, idx) => {
-        console.log(`${idx + 1}: ${comboToString(combo)}`);
+        console.log(`${idx + 1}: ${comboToString(combo)} | ${combo}`);
     });
 
     // Guardar resultados en archivo JSON
