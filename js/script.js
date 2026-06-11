@@ -330,10 +330,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (isUnlocked) {
                 // Draw full pattern
-                drawMiniFigure(canvas, figure.segments);
+                drawMiniFigure(canvas, figure.segments, { showPoints: false });
             } else {
-                // Draw just points and overlay
-                drawMiniFigure(canvas, null);
+                drawMiniFigure(canvas, null, { showPoints: false });
                 
                 const overlay = document.createElement('div');
                 overlay.className = 'lock-overlay';
@@ -422,9 +421,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             solutionsGrid.appendChild(card);
             
             if (isUnlocked) {
-                drawMiniFigure(canvas, figure.segments);
+                drawMiniFigure(canvas, figure.segments, { showPoints: false });
             } else {
-                drawMiniFigure(canvas, null);
+                drawMiniFigure(canvas, null, { showPoints: false });
                 const overlay = document.createElement('div');
                 overlay.className = 'lock-overlay';
                 overlay.innerHTML = '🔒';
@@ -434,9 +433,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    function drawMiniFigure(canvas, segments) {
+    function drawMiniFigure(canvas, segments, options = {}) {
         const ctx = canvas.getContext('2d');
         const miniRough = window.rough ? rough.canvas(canvas) : null;
+        const showPoints = options.showPoints ?? true;
         const padding = 20;
         const size = canvas.width;
         const cellSize = (size - 2 * padding) / 2;
@@ -452,9 +452,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        for(let i=1; i<=9; i++) {
-            const {x, y} = getCoords(i);
-            drawSketchPoint(miniRough, ctx, x, y, size <= 90 ? 5 : 7);
+        if (showPoints) {
+            for(let i=1; i<=9; i++) {
+                const {x, y} = getCoords(i);
+                drawSketchPoint(miniRough, ctx, x, y, size <= 90 ? 5 : 7);
+            }
         }
 
         if (!segments || segments.length === 0) return;
@@ -473,7 +475,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 stroke: '#2d2418',
                 strokeWidth,
                 roughness: 1.7,
-                bowing: 1.4
+                bowing: 1.4,
+                seed: sketchSeed(x1, y1, x2, y2)
             });
             return;
         }
@@ -507,7 +510,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 strokeWidth: 1.4,
                 fill: '#f7efe1',
                 fillStyle: 'solid',
-                roughness: 1.9
+                roughness: 1.9,
+                seed: sketchSeed(x, y, diameter, diameter)
             });
             return;
         }
@@ -538,5 +542,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             x: Math.sin(seed * 12.9898) * amount,
             y: Math.cos(seed * 78.233) * amount
         };
+    }
+
+    function sketchSeed(...values) {
+        return Math.max(1, Math.round(values.reduce((sum, value, index) => {
+            return sum + value * (index + 3) * 97;
+        }, 0)));
     }
 });
