@@ -287,22 +287,41 @@ document.addEventListener('DOMContentLoaded', async function() {
         const unlocked = validFigures.filter(p => unlockedIndices.has(p.id));
         const locked = validFigures.filter(p => !unlockedIndices.has(p.id));
 
-        // Note: ¿Ordenar la lógica para colocar los desbloqueados más recientemente en la parte superior?
-        // Prompt says "Las figuras desbloqueadas deben aparecer al inicio".
-        // Simplemente apilemos desbloqueado y luego bloqueado.
-
         [...unlocked, ...locked].forEach(figure => {
             const isUnlocked = unlockedIndices.has(figure.id);
             const el = document.createElement('div');
             el.className = `lock-item ${isUnlocked ? 'unlocked' : ''}`;
             
-            el.innerHTML = `
-                <div class="lock-icon">${isUnlocked ? '🔓' : '🔒'}</div>
-                <div class="lock-info">
-                    <div class="lock-title">${isUnlocked ? 'Figura #' + (figure.id + 1) : 'Bloqueada'}</div>
-                    <div class="figure-preview">${isUnlocked ? figure.pathString : '???'}</div>
-                </div>
-            `;
+            // Title
+            const title = document.createElement('div');
+            title.className = 'lock-title';
+            title.textContent = isUnlocked ? 'Figura #' + (figure.id + 1) : 'Bloqueada';
+            el.appendChild(title);
+
+            // Canvas Container
+            const wrapper = document.createElement('div');
+            wrapper.className = 'canvas-wrapper';
+            
+            const canvas = document.createElement('canvas');
+            canvas.className = 'list-canvas';
+            canvas.width = 140; // High resolution for display
+            canvas.height = 140;
+            wrapper.appendChild(canvas);
+
+            if (isUnlocked) {
+                // Draw full pattern
+                drawMiniFigure(canvas, figure.segments);
+            } else {
+                // Draw just points and overlay
+                drawMiniFigure(canvas, null);
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'lock-overlay';
+                overlay.innerHTML = '🔒';
+                wrapper.appendChild(overlay);
+            }
+
+            el.appendChild(wrapper);
             figureListEl.appendChild(el);
         });
 
@@ -356,21 +375,42 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             const isUnlocked = unlockedIndices.has(figure.id);
             
-            const title = document.createElement('div');
+            // Container relative for overlay
+            card.style.position = 'relative';
+
+            const title = document.createElement('h3');
             title.textContent = `Figura #${figure.id + 1}`;
-            title.style.marginBottom = '5px';
             title.style.color = isUnlocked ? '#00dbde' : '#fff';
             
+            const canvasWrapper = document.createElement('div');
+            canvasWrapper.className = 'canvas-wrapper';
+            canvasWrapper.style.width = '80px';
+            canvasWrapper.style.height = '80px';
+            canvasWrapper.style.margin = '0 auto';
+            canvasWrapper.style.background = 'rgba(0,0,0,0.2)';
+
             const canvas = document.createElement('canvas');
             canvas.className = 'solution-canvas';
-            canvas.width = 120;
-            canvas.height = 120;
+            canvas.width = 80;
+            canvas.height = 80;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
             
+            canvasWrapper.appendChild(canvas);
             card.appendChild(title);
-            card.appendChild(canvas);
+            card.appendChild(canvasWrapper);
             solutionsGrid.appendChild(card);
             
-            drawMiniFigure(canvas, figure.segments);
+            if (isUnlocked) {
+                drawMiniFigure(canvas, figure.segments);
+            } else {
+                drawMiniFigure(canvas, null);
+                const overlay = document.createElement('div');
+                overlay.className = 'lock-overlay';
+                overlay.innerHTML = '🔒';
+                overlay.style.fontSize = '1.5rem';
+                canvasWrapper.appendChild(overlay);
+            }
         });
     }
 
