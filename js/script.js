@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const grid = document.getElementById('figureGrid');
     const canvas = document.getElementById('lineCanvas');
     const ctx = canvas.getContext('2d');
+    let roughCanvas = window.rough ? rough.canvas(canvas) : null;
     const messageArea = document.getElementById('messageArea');
     const figureListEl = document.getElementById('figureList');
     const progressCountEl = document.getElementById('progressCount');
@@ -25,6 +26,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadFigures();
     loadProgress();
     renderList();
+    window.addEventListener('rough-ready', syncRoughRenderer);
+    window.addEventListener('load', syncRoughRenderer);
 
     // --- Event Listeners ---
     grid.addEventListener('mousedown', startDrawing);
@@ -92,6 +95,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     function saveProgress() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify([...unlockedIndices]));
         updateProgressDisplay();
+    }
+
+    function syncRoughRenderer() {
+        if (!window.rough || roughCanvas) return;
+
+        roughCanvas = rough.canvas(canvas);
+        renderList();
+        if (solutionsModal.style.display === 'block') {
+            renderAllSolutions();
+        }
     }
 
     // --- Grid Logic ---
@@ -213,24 +226,31 @@ document.addEventListener('DOMContentLoaded', async function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (selectedPoints.length === 0) return;
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#00dbde';
-        ctx.lineWidth = 4;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#00dbde';
-
-        ctx.moveTo(selectedPoints[0].x, selectedPoints[0].y);
         for (let i = 1; i < selectedPoints.length; i++) {
-            ctx.lineTo(selectedPoints[i].x, selectedPoints[i].y);
+            drawSketchLine(
+                roughCanvas,
+                ctx,
+                selectedPoints[i - 1].x,
+                selectedPoints[i - 1].y,
+                selectedPoints[i].x,
+                selectedPoints[i].y,
+                4
+            );
         }
 
         if (mouseX !== null && mouseY !== null) {
             const rect = grid.getBoundingClientRect();
-            ctx.lineTo(mouseX - rect.left, mouseY - rect.top);
+            const lastPoint = selectedPoints[selectedPoints.length - 1];
+            drawSketchLine(
+                roughCanvas,
+                ctx,
+                lastPoint.x,
+                lastPoint.y,
+                mouseX - rect.left,
+                mouseY - rect.top,
+                3
+            );
         }
-        ctx.stroke();
     }
 
     // --- Game Logic ---
@@ -262,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 unlockedIndices.add(match.id);
                 saveProgress();
                 renderList();
-                showFeedback("¡Figura desbloqueada!", '#00dbde');
+                showFeedback("¡Figura desbloqueada!", '#4f6f3a');
                 // Scroll to top
                 figureListEl.scrollTop = 0;
             }
@@ -380,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             const title = document.createElement('h3');
             title.textContent = `Figura #${figure.id + 1}`;
-            title.style.color = isUnlocked ? '#00dbde' : '#fff';
+            title.style.color = isUnlocked ? '#2d2418' : '#7c6a51';
             
             const canvasWrapper = document.createElement('div');
             canvasWrapper.className = 'canvas-wrapper';
@@ -416,6 +436,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function drawMiniFigure(canvas, segments) {
         const ctx = canvas.getContext('2d');
+        const miniRough = window.rough ? rough.canvas(canvas) : null;
         const padding = 20;
         const size = canvas.width;
         const cellSize = (size - 2 * padding) / 2;
@@ -429,30 +450,93 @@ document.addEventListener('DOMContentLoaded', async function() {
             }; // 1-based index to 0-based row/col
         };
 
-        // Draw points
-        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         for(let i=1; i<=9; i++) {
             const {x, y} = getCoords(i);
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fill();
+            drawSketchPoint(miniRough, ctx, x, y, size <= 90 ? 5 : 7);
         }
 
         if (!segments || segments.length === 0) return;
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#00dbde';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
         segments.forEach(seg => {
             const start = getCoords(seg[0]);
             const end = getCoords(seg[1]);
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.stroke();
+            drawSketchLine(miniRough, ctx, start.x, start.y, end.x, end.y, size <= 90 ? 2 : 3);
         });
 
+    }
+
+    function drawSketchLine(roughSurface, ctx, x1, y1, x2, y2, strokeWidth) {
+        if (roughSurface) {
+            roughSurface.line(x1, y1, x2, y2, {
+                stroke: '#2d2418',
+                strokeWidth,
+                roughness: 1.7,
+                bowing: 1.4
+            });
+            return;
+        }
+
+        ctx.strokeStyle = '#2d2418';
+        ctx.lineWidth = strokeWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        for (let pass = 0; pass < 2; pass++) {
+            const startJitter = sketchJitter(x1 + y1 + pass, 1.8);
+            const endJitter = sketchJitter(x2 + y2 + pass, 1.8);
+            const controlJitter = sketchJitter(x1 + x2 + y1 + y2 + pass, 5);
+
+            ctx.beginPath();
+            ctx.moveTo(x1 + startJitter.x, y1 + startJitter.y);
+            ctx.quadraticCurveTo(
+                (x1 + x2) / 2 + controlJitter.x,
+                (y1 + y2) / 2 + controlJitter.y,
+                x2 + endJitter.x,
+                y2 + endJitter.y
+            );
+            ctx.stroke();
+        }
+    }
+
+    function drawSketchPoint(roughSurface, ctx, x, y, diameter) {
+        if (roughSurface) {
+            roughSurface.circle(x, y, diameter, {
+                stroke: '#2d2418',
+                strokeWidth: 1.4,
+                fill: '#f7efe1',
+                fillStyle: 'solid',
+                roughness: 1.9
+            });
+            return;
+        }
+
+        ctx.fillStyle = '#f7efe1';
+        ctx.strokeStyle = '#2d2418';
+        ctx.lineWidth = 1.4;
+
+        for (let pass = 0; pass < 2; pass++) {
+            const jitter = sketchJitter(x + y + pass, 1.2);
+            ctx.beginPath();
+            ctx.ellipse(
+                x + jitter.x,
+                y + jitter.y,
+                diameter / 2,
+                diameter / 2.4,
+                pass * 0.45,
+                0,
+                Math.PI * 2
+            );
+            if (pass === 0) ctx.fill();
+            ctx.stroke();
+        }
+    }
+
+    function sketchJitter(seed, amount) {
+        return {
+            x: Math.sin(seed * 12.9898) * amount,
+            y: Math.cos(seed * 78.233) * amount
+        };
     }
 });
