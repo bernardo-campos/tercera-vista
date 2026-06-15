@@ -306,3 +306,233 @@ body {
     border-radius: 5px;
 }
 
+/* Intro page */
+body.intro-page {
+    min-height: 100vh;
+    height: auto;
+    overflow: auto;
+    background: #eadbbf;
+    background-image:
+        linear-gradient(rgba(45, 36, 24, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 36, 24, 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+
+.intro-shell {
+    width: min(1120px, calc(100% - 32px));
+    min-height: 100vh;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(460px, 1.1fr);
+    gap: 36px;
+    align-items: center;
+    padding: 36px 0;
+}
+
+.intro-copy {
+    max-width: 520px;
+}
+
+.intro-kicker {
+    width: fit-content;
+    margin-bottom: 14px;
+    padding: 5px 12px;
+    background: #f7efe1;
+    border: 2px solid #2d2418;
+    border-radius: 9px 13px 8px 12px;
+    color: #6b5130;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0;
+}
+
+.intro-copy h1 {
+    font-size: 3.2rem;
+    line-height: 1;
+    color: #2d2418;
+    text-shadow: 3px 3px 0 rgba(114, 84, 45, 0.2);
+}
+
+.intro-copy p {
+    margin-top: 18px;
+    color: #4d3a24;
+    font-size: 1.08rem;
+    line-height: 1.55;
+}
+
+.btn-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    min-height: 52px;
+    margin-top: 28px;
+    padding: 14px 28px;
+    background: #e0b44b;
+    color: #2d2418;
+    border: 2px solid #2d2418;
+    border-radius: 9px 13px 8px 14px;
+    box-shadow: 4px 4px 0 rgba(45, 36, 24, 0.22);
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.btn-play:hover,
+.btn-play:focus {
+    background: #efc766;
+    transform: translate(-1px, -1px);
+}
+
+.intro-board {
+    position: relative;
+    padding: 18px;
+    background: #f7efe1;
+    border: 2px solid #2d2418;
+    border-radius: 12px 18px 14px 20px;
+    box-shadow: 10px 10px 0 rgba(45, 36, 24, 0.18);
+}
+
+.projection-sheet {
+    display: block;
+    width: 100%;
+    min-height: 420px;
+    background: #eadbbf;
+    border: 1px solid rgba(45, 36, 24, 0.35);
+    border-radius: 8px 12px 9px 13px;
+}
+
+.projection-sheet text {
+    fill: #6b5130;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.projection-guides path,
+.given-view rect,
+.third-zone rect,
+.third-zone path {
+    fill: none;
+    stroke: #2d2418;
+    stroke-linecap: square;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.projection-guides path {
+    stroke-width: 1.3;
+    opacity: 0.55;
+    stroke-dasharray: 610;
+    stroke-dashoffset: 610;
+    animation: drawProjection 1s ease forwards;
+}
+
+.projection-guides .axis {
+    stroke-width: 4;
+    opacity: 0.85;
+}
+
+.projection-guides .axis-vertical {
+    animation-delay: 0.1s;
+}
+
+.given-view rect {
+    stroke-width: 2.5;
+    fill: rgba(247, 239, 225, 0.38);
+}
+
+.given-view {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: viewAppear 0.5s ease 0.35s forwards;
+}
+
+.top-view {
+    animation-delay: 0.55s;
+}
+
+.third-zone {
+    opacity: 0;
+    animation: thirdZoneAppear 0.55s ease 1.1s forwards;
+}
+
+.third-zone rect {
+    stroke-width: 2.5;
+    stroke-dasharray: 8 8;
+    fill: rgba(224, 180, 75, 0.08);
+}
+
+.third-zone path {
+    stroke-width: 1.2;
+    opacity: 0.48;
+}
+
+.third-zone .unknown-mark {
+    fill: #2d2418;
+    font-size: 64px;
+    opacity: 0.55;
+}
+
+@keyframes viewAppear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes drawProjection {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes thirdZoneAppear {
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 760px) {
+    .intro-shell {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .intro-copy {
+        max-width: 720px;
+        padding-top: 20px;
+    }
+
+    .intro-copy h1 {
+        font-size: 2.6rem;
+    }
+
+    .projection-sheet {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 560px) {
+    .intro-shell {
+        width: min(100% - 20px, 1120px);
+        padding: 18px 0 28px;
+    }
+
+    .intro-copy h1 {
+        font-size: 2.1rem;
+    }
+
+    .intro-copy p {
+        font-size: 1rem;
+    }
+
+    .intro-board {
+        padding: 10px;
+    }
+
+    .projection-sheet {
+        min-height: 300px;
+    }
+}
+

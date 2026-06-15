@@ -1,3 +1,7 @@
+import rough from '../node_modules/roughjs/bundled/rough.esm.js';
+
+window.rough = rough;
+
 document.addEventListener('DOMContentLoaded', async function() {
     // --- Configuration & State ---
     const STORAGE_KEY = 'figureLock_progress';
@@ -8,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const grid = document.getElementById('figureGrid');
     const canvas = document.getElementById('lineCanvas');
     const ctx = canvas.getContext('2d');
-    let roughCanvas = window.rough ? rough.canvas(canvas) : null;
+    let roughCanvas = rough ? rough.canvas(canvas) : null;
     const messageArea = document.getElementById('messageArea');
     const figureListEl = document.getElementById('figureList');
     const progressCountEl = document.getElementById('progressCount');
@@ -98,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function syncRoughRenderer() {
-        if (!window.rough || roughCanvas) return;
+        if (!rough || roughCanvas) return;
 
         roughCanvas = rough.canvas(canvas);
         renderList();
@@ -435,7 +439,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function drawMiniFigure(canvas, segments, options = {}) {
         const ctx = canvas.getContext('2d');
-        const miniRough = window.rough ? rough.canvas(canvas) : null;
+        const miniRough = rough ? rough.canvas(canvas) : null;
         const showPoints = options.showPoints ?? true;
         const padding = 20;
         const size = canvas.width;
