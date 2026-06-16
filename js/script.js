@@ -1,4 +1,4 @@
-import rough from '../node_modules/roughjs/bundled/rough.esm.js';
+import rough from './vendor/rough.esm.js';
 
 window.rough = rough;
 
